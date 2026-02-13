@@ -1,0 +1,137 @@
+:root {
+  --primary-color: #ff0000;
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --gray-light: #f1f1f1;
+  --gray-dark: #606060;
+  --shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+body {
+  margin: 0;
+  width: 320px;
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.content {
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.label-text {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.status {
+  font-size: 12px;
+  color: var(--gray-dark);
+  margin-top: 4px;
+}
+
+/* Toggle Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--primary-color);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px var(--primary-color);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.footer {
+  padding: 10px 20px;
+  background-color: var(--gray-light);
+  text-align: center;
+  font-size: 12px;
+  color: var(--gray-dark);
+}
+
+.btn {
+  background-color: transparent;
+  border: 1px solid var(--gray-dark);
+  color: var(--gray-dark);
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  background-color: var(--gray-dark);
+  color: white;
+}

@@ -1,0 +1,14 @@
+# Ignore git directory
+.git
+.gitignore
+
+# Ignore build artifacts
+bin/
+server
+*.log
+
+# Ignore env files (Secrets!)
+.env
+
+# Ignore temp files
+.DS_Store

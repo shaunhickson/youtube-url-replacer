@@ -1,0 +1,18 @@
+# Binaries
+/backend/server
+/backend/bin/
+
+# Extension build artifacts
+/extension/dist/
+/extension/node_modules/
+
+# OS specific
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+
+# Environment variables
+.env
+\n# Temporary files\nbackend.log\nextension.zip
