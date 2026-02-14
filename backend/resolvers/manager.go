@@ -6,18 +6,25 @@ import (
 	"log"
 	"net/url"
 	"sync"
+	"time"
 )
 
 type ResolverManager struct {
 	resolvers []Resolver
 	cache     Cache
+	timeout   time.Duration
 }
 
 func NewResolverManager(cache Cache) *ResolverManager {
 	return &ResolverManager{
 		resolvers: []Resolver{},
 		cache:     cache,
+		timeout:   2 * time.Second, // Default timeout
 	}
+}
+
+func (m *ResolverManager) SetTimeout(t time.Duration) {
+	m.timeout = t
 }
 
 func (m *ResolverManager) Register(r Resolver) {
@@ -25,6 +32,13 @@ func (m *ResolverManager) Register(r Resolver) {
 }
 
 func (m *ResolverManager) ResolveMulti(ctx context.Context, urls []string) map[string]string {
+	// Apply global timeout if not already set on context
+	if m.timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, m.timeout)
+		defer cancel()
+	}
+
 	results := make(map[string]string)
 	var missingURLs []string
 

@@ -4,6 +4,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/sph/youtube-url-replacer/backend/resolvers"
@@ -41,15 +44,39 @@ func main() {
 	// Initialize Resolver Manager
 	manager := resolvers.NewResolverManager(cache)
 
-	// Register YouTube Resolver
-	ytResolver, err := resolvers.NewYouTubeResolver(apiKey)
-	if err != nil {
-		log.Fatalf("Failed to create YouTube resolver: %v", err)
+	// Configure Timeout
+	if timeoutStr := os.Getenv("RESOLVER_TIMEOUT_MS"); timeoutStr != "" {
+		if ms, err := strconv.Atoi(timeoutStr); err == nil {
+			manager.SetTimeout(time.Duration(ms) * time.Millisecond)
+		}
 	}
-	manager.Register(ytResolver)
+
+	enabledResolvers := os.Getenv("ENABLED_RESOLVERS")
+	isEnabled := func(name string) bool {
+		if enabledResolvers == "" {
+			return true
+		}
+		for _, r := range strings.Split(enabledResolvers, ",") {
+			if strings.TrimSpace(r) == name {
+				return true
+			}
+		}
+		return false
+	}
+
+	// Register YouTube Resolver
+	if isEnabled("youtube") {
+		ytResolver, err := resolvers.NewYouTubeResolver(apiKey)
+		if err != nil {
+			log.Fatalf("Failed to create YouTube resolver: %v", err)
+		}
+		manager.Register(ytResolver)
+	}
 
 	// Register OpenGraph Resolver (Fallback)
-	manager.Register(resolvers.NewOpenGraphResolver())
+	if isEnabled("opengraph") {
+		manager.Register(resolvers.NewOpenGraphResolver())
+	}
 
 	handler := NewHandler(cache, manager)
 
