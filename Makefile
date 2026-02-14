@@ -5,7 +5,7 @@ backend-dev:
 	cd backend && go run main.go
 
 build-backend:
-	cd backend && go build -o server main.go
+	cd backend && go build -o server .
 
 # Extension
 extension-install:
