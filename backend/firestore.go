@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"github.com/sph/youtube-url-replacer/backend/resolvers"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -17,7 +20,7 @@ type FirestoreCache struct {
 	client *firestore.Client
 }
 
-func NewFirestoreCache(projectID string) (*FirestoreCache, error) {
+func NewFirestoreCache(projectID string) (resolvers.Cache, error) {
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
@@ -26,11 +29,16 @@ func NewFirestoreCache(projectID string) (*FirestoreCache, error) {
 	return &FirestoreCache{client: client}, nil
 }
 
-func (f *FirestoreCache) Get(videoID string) (string, bool) {
+func hashKey(key string) string {
+	hash := sha256.Sum256([]byte(key))
+	return hex.EncodeToString(hash[:])
+}
+
+func (f *FirestoreCache) Get(key string) (string, bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	doc, err := f.client.Collection(collectionName).Doc(videoID).Get(ctx)
+	doc, err := f.client.Collection(collectionName).Doc(hashKey(key)).Get(ctx)
 	if status.Code(err) == codes.NotFound {
 		return "", false
 	}
@@ -45,28 +53,29 @@ func (f *FirestoreCache) Get(videoID string) (string, bool) {
 	return "", false
 }
 
-func (f *FirestoreCache) Set(videoID string, title string) {
+func (f *FirestoreCache) Set(key string, title string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	_, err := f.client.Collection(collectionName).Doc(videoID).Set(ctx, map[string]interface{}{
+	_, err := f.client.Collection(collectionName).Doc(hashKey(key)).Set(ctx, map[string]interface{}{
 		"title":     title,
 		"updatedAt": firestore.ServerTimestamp,
+		"original":  key, // Store original key for debugging
 	})
 	if err != nil {
 		log.Printf("Error writing to Firestore: %v", err)
 	}
 }
 
-func (f *FirestoreCache) GetMulti(videoIDs []string) map[string]string {
+func (f *FirestoreCache) GetMulti(keys []string) map[string]string {
 	// Firestore allows getting multiple documents by reference, but the SDK
 	// GetAll API takes DocumentRefs.
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	var refs []*firestore.DocumentRef
-	for _, id := range videoIDs {
-		refs = append(refs, f.client.Collection(collectionName).Doc(id))
+	for _, key := range keys {
+		refs = append(refs, f.client.Collection(collectionName).Doc(hashKey(key)))
 	}
 
 	docs, err := f.client.GetAll(ctx, refs)
@@ -81,7 +90,7 @@ func (f *FirestoreCache) GetMulti(videoIDs []string) map[string]string {
 			continue
 		}
 		if title, ok := doc.Data()["title"].(string); ok {
-			results[videoIDs[i]] = title
+			results[keys[i]] = title
 		}
 	}
 	return results

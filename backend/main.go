@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/sph/youtube-url-replacer/backend/resolvers"
 )
 
 func main() {
@@ -20,21 +21,9 @@ func main() {
 	}
 
 	apiKey := os.Getenv("YOUTUBE_API_KEY")
-	var ytService *YouTubeService
-	var err error
-
-	if apiKey == "" {
-		log.Println("Warning: YOUTUBE_API_KEY is not set. Using MOCK YouTube service.")
-		ytService = &YouTubeService{service: nil} // Nil service indicates mock mode
-	} else {
-		ytService, err = NewYouTubeService(apiKey)
-		if err != nil {
-			log.Fatalf("Failed to create YouTube service: %v", err)
-		}
-	}
 
 	// Initialize Cache (Firestore or Memory)
-	var cache Cache
+	var cache resolvers.Cache
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 
 	if projectID != "" {
@@ -49,7 +38,20 @@ func main() {
 		cache = NewInMemoryCache()
 	}
 
-	handler := NewHandler(cache, ytService)
+	// Initialize Resolver Manager
+	manager := resolvers.NewResolverManager(cache)
+
+	// Register YouTube Resolver
+	ytResolver, err := resolvers.NewYouTubeResolver(apiKey)
+	if err != nil {
+		log.Fatalf("Failed to create YouTube resolver: %v", err)
+	}
+	manager.Register(ytResolver)
+
+	// Register OpenGraph Resolver (Fallback)
+	manager.Register(resolvers.NewOpenGraphResolver())
+
+	handler := NewHandler(cache, manager)
 
 	// Set up routes
 	http.Handle("/resolve", handler)

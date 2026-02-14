@@ -2,14 +2,9 @@ package main
 
 import (
 	"sync"
-)
 
-// Cache defines the interface for storing and retrieving video titles
-type Cache interface {
-	Get(videoID string) (string, bool)
-	Set(videoID string, title string)
-	GetMulti(videoIDs []string) map[string]string
-}
+	"github.com/sph/youtube-url-replacer/backend/resolvers"
+)
 
 // InMemoryCache is a simple thread-safe map implementation of Cache
 type InMemoryCache struct {
@@ -17,7 +12,7 @@ type InMemoryCache struct {
 	store map[string]string
 }
 
-func NewInMemoryCache() *InMemoryCache {
+func NewInMemoryCache() resolvers.Cache {
 	return &InMemoryCache{
 		store: make(map[string]string),
 	}
