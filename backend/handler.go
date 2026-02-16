@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/sph/youtube-url-replacer/backend/resolvers"
 )
 
 type ResolveRequest struct {
 	VideoIDs []string `json:"videoIds"`
+	URLs     []string `json:"urls"`
 }
 
 type ResolveResponse struct {
@@ -15,14 +18,14 @@ type ResolveResponse struct {
 }
 
 type Handler struct {
-	cache     Cache
-	ytService *YouTubeService
+	cache    resolvers.Cache
+	manager  *resolvers.ResolverManager
 }
 
-func NewHandler(cache Cache, ytService *YouTubeService) *Handler {
+func NewHandler(cache resolvers.Cache, manager *resolvers.ResolverManager) *Handler {
 	return &Handler{
-		cache:     cache,
-		ytService: ytService,
+		cache:   cache,
+		manager: manager,
 	}
 }
 
@@ -47,42 +50,32 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(req.VideoIDs) == 0 {
+	if len(req.VideoIDs) == 0 && len(req.URLs) == 0 {
 		json.NewEncoder(w).Encode(ResolveResponse{Titles: map[string]string{}})
 		return
 	}
 
-	// 1. Check Cache
-	cachedTitles := h.cache.GetMulti(req.VideoIDs)
-	
-	// 2. Identify missing IDs
-	var missingIDs []string
-	for _, id := range req.VideoIDs {
-		if _, ok := cachedTitles[id]; !ok {
-			missingIDs = append(missingIDs, id)
+	results := make(map[string]string)
+
+	// 1. Resolve URLs
+	if len(req.URLs) > 0 {
+		urlResults := h.manager.ResolveMulti(r.Context(), req.URLs)
+		for u, title := range urlResults {
+			results[u] = title
 		}
 	}
 
-	// 3. Fetch from YouTube if needed
-	if len(missingIDs) > 0 {
-		log.Printf("Fetching %d videos from YouTube API", len(missingIDs))
-		fetchedTitles, err := h.ytService.FetchTitles(missingIDs)
-		if err != nil {
-			log.Printf("Error fetching from YouTube: %v", err)
-			// Return partial results (cached only) or error? 
-			// Let's return what we have, maybe the UI can retry.
-		} else {
-			// Update cache and results
-			for id, title := range fetchedTitles {
-				h.cache.Set(id, title)
-				cachedTitles[id] = title
-			}
+	// 2. Resolve Video IDs (Legacy)
+	if len(req.VideoIDs) > 0 {
+		idResults := h.manager.ResolveVideoIDs(r.Context(), req.VideoIDs)
+		for id, title := range idResults {
+			results[id] = title
 		}
 	}
 
-	// 4. Return combined results
+	// 3. Return combined results
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(ResolveResponse{Titles: cachedTitles}); err != nil {
+	if err := json.NewEncoder(w).Encode(ResolveResponse{Titles: results}); err != nil {
 		log.Printf("Error encoding response: %v", err)
 	}
 }
