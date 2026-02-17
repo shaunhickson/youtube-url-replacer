@@ -103,7 +103,9 @@ func main() {
 	http.Handle("/resolve", rateLimiter.Middleware(handler))
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		if _, err := w.Write([]byte("OK")); err != nil {
+			log.Printf("Health check write failed: %v", err)
+		}
 	})
 
 	log.Printf("Server listening on port %s", port)

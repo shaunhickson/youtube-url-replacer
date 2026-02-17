@@ -69,7 +69,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if totalItems == 0 {
-		json.NewEncoder(w).Encode(ResolveResponse{Titles: map[string]string{}})
+		if err := json.NewEncoder(w).Encode(ResolveResponse{Titles: map[string]string{}}); err != nil {
+			log.Printf("Error encoding empty response: %v", err)
+		}
 		return
 	}
 
