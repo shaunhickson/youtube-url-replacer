@@ -43,7 +43,7 @@ The modern web is cluttered with opaque identifiers: shortened links (`bit.ly/xy
 *   [x] **Privacy Controls:** Allow/Block lists for domains (Issue #19).
 *   [x] **URL Unshortener:** Automatically unwrap `bit.ly`, `t.co`, etc., to show the final destination.
 *   [ ] **Marketing Website:** Landing page with live demo, features, and download links (Issue #39).
-*   [ ] **Visual Update:** Extension UI/UX improvements to differentiate link types (icons, tooltips).
+*   [x] **Visual Update:** Extension UI/UX improvements to differentiate link types (icons, tooltips).
 
 ### Phase 3: Deep Integrations & Enterprise Value
 *Goal: Provide specific, high-value data for popular platforms and teams.*

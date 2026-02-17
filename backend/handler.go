@@ -14,7 +14,8 @@ type ResolveRequest struct {
 }
 
 type ResolveResponse struct {
-	Titles map[string]string `json:"titles"`
+	Titles  map[string]string            `json:"titles"`
+	Details map[string]*resolvers.Result `json:"details,omitempty"`
 }
 
 type Handler struct {
@@ -76,12 +77,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	results := make(map[string]string)
+	details := make(map[string]*resolvers.Result)
 
 	// 1. Resolve URLs
 	if len(req.URLs) > 0 {
 		urlResults := h.manager.ResolveMulti(r.Context(), req.URLs)
-		for u, title := range urlResults {
-			results[u] = title
+		for u, res := range urlResults {
+			results[u] = res.Title
+			details[u] = res
 		}
 	}
 
@@ -95,7 +98,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// 3. Return combined results
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(ResolveResponse{Titles: results}); err != nil {
+	if err := json.NewEncoder(w).Encode(ResolveResponse{
+		Titles:  results,
+		Details: details,
+	}); err != nil {
 		slog.Error("Error encoding response", "error", err)
 	}
 }
