@@ -16,7 +16,8 @@ Every roadmap item follows this strict lifecycle:
 ```mermaid
 graph TD
     A[Backlog Item] -->|Agent: Design| B(Draft Design Doc)
-    B -->|Human: Review| C{Approved?}
+    B -->|Agent: Self-Review| B2[Checklist Verified]
+    B2 -->|Human: Review| C{Approved?}
     C -->|No| B
     C -->|Yes| D[Agent: Implementation]
     D -->|Agent: Tests & Verification| E(Pull Request)
@@ -37,6 +38,7 @@ To enforce the "Design-First" mandate, complex features require **two separate P
 
 #### Phase A: Design PR
 *   **Content:** Markdown files in `docs/` (e.g., `docs/DESIGN_RATE_LIMITER.md`).
+*   **Mandatory:** Verify against `docs/DESIGN_REVIEW_CHECKLIST.md` before opening PR.
 *   **Goal:** Define *what* we are building and *how*.
 *   **Review:** Human checks strictly for architectural soundness and product alignment.
 *   **Merge:** Merging this PR signals approval to start coding.
