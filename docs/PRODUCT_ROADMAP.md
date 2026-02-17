@@ -14,10 +14,11 @@
 ### Phase 1: Robustness & Scale (Current Focus)
 *Goal: Ensure the foundation is solid, secure, and ready for traffic.*
 
-*   [ ] **Rate Limiting:** Protect the backend from abuse (Issue #13).
-*   [ ] **Testing & CI/CD:** Establish a reliable deployment pipeline with comprehensive coverage (Issue #8).
-*   [ ] **Security Audit:** Harden the system, specifically against SSRF as we prepare to fetch external URLs (Issue #10).
-*   [ ] **Collaboration Strategy:** Define how agents and humans work together (Issue #12).
+*   [x] **Rate Limiting:** Protect the backend from abuse (Issue #13).
+*   [x] **Testing & CI/CD:** Establish a reliable deployment pipeline with comprehensive coverage (Issue #8).
+*   [x] **Security Audit (Design):** Harden the system, specifically against SSRF as we prepare to fetch external URLs (Issue #10).
+*   [ ] **Security Implementation:** Implement SSRF protection and hardening (Issue #33).
+*   [x] **Collaboration Strategy:** Define how agents and humans work together (Issue #12).
 *   [ ] **Observability:** Structured JSON logging for Cloud Run (Issue #15).
 *   [ ] **DevEx:** Comprehensive Makefile targets (test, lint, docker) (Issue #16).
 
