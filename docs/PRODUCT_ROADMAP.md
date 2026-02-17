@@ -1,28 +1,38 @@
 # Product Roadmap: LinkLens
 
-**Current Version:** 0.1 (Alpha)
+**Current Version:** 0.2 (Beta Candidate)
 **Last Updated:** 2026-02-16
 
-## 1. Product Identity
+## 1. Product Vision & Strategy
 
-*   **Name:** **LinkLens**
-*   **Tagline:** "Know before you click."
-*   **Mission:** To bring context and clarity to the opaque web by instantly transforming raw URLs into human-readable insights.
+### The "Big Picture" Goal
+**To make the web transparent by default.**
+The modern web is cluttered with opaque identifiers: shortened links (`bit.ly/xyz`), tracking redirects (`t.co/...`), and raw IDs (`youtube.com/watch?v=...`). Users are forced to "click and hope." LinkLens acts as the "Alt Text" for the internet's connective tissue, restoring context, safety, and clarity to every link before you interact with it.
 
-## 2. Strategic Phases
+### Strategic Pillars
+1.  **Public Utility (The "Trust" Engine):**
+    *   **Goal:** Provide the fastest, most private link resolver for the public web.
+    *   **Monetization:** Free / Open Source (Community Edition).
+    *   **Value:** Builds the user base, refines the parsing engine, and establishes the brand as "Safe."
 
-### Phase 1: Robustness & Scale (Current Focus)
+2.  **Enterprise Context (The "Value" Engine):**
+    *   **Goal:** Bring context to internal tools where clarity equals productivity.
+    *   **Use Case:** A developer sees `LINEAR-123` in Slack. LinkLens resolves it to *"Fix Critical Auth Bug (High Priority)"* securely.
+    *   **Monetization:** SaaS subscriptions for teams (Private Resolvers, SSO, Audit Logs).
+
+## 2. Execution Roadmap
+
+### Phase 1: Robustness & Scale (Completed)
 *Goal: Ensure the foundation is solid, secure, and ready for traffic.*
 
 *   [x] **Rate Limiting:** Protect the backend from abuse (Issue #13).
 *   [x] **Testing & CI/CD:** Establish a reliable deployment pipeline with comprehensive coverage (Issue #8).
-*   [x] **Security Audit (Design):** Harden the system, specifically against SSRF as we prepare to fetch external URLs (Issue #10).
-*   [ ] **Security Implementation:** Implement SSRF protection and hardening (Issue #33).
+*   [x] **Security Audit:** Harden the system against SSRF and XSS (Issue #10, #33).
+*   [x] **Observability:** Structured JSON logging for Cloud Run (Issue #15).
+*   [x] **DevEx:** Comprehensive Makefile targets (Issue #16).
 *   [x] **Collaboration Strategy:** Define how agents and humans work together (Issue #12).
-*   [ ] **Observability:** Structured JSON logging for Cloud Run (Issue #15).
-*   [ ] **DevEx:** Comprehensive Makefile targets (test, lint, docker) (Issue #16).
 
-### Phase 2: The "Universal" Pivot
+### Phase 2: The "Universal" Pivot (Current Focus)
 *Goal: Move beyond YouTube to support the wider web.*
 
 *   [ ] **Modular Architecture:** Refactor backend to support pluggable resolvers (See `docs/DESIGN_MODULAR_RESOLVER.md`).
@@ -33,12 +43,12 @@
 *   [ ] **URL Unshortener:** Automatically unwrap `bit.ly`, `t.co`, etc., to show the final destination.
 *   [ ] **Visual Update:** Extension UI/UX improvements to differentiate link types (icons, tooltips).
 
-### Phase 3: Deep Integrations & specialized Value
-*Goal: Provide specific, high-value data for popular platforms.*
+### Phase 3: Deep Integrations & Enterprise Value
+*Goal: Provide specific, high-value data for popular platforms and teams.*
 
 *   [ ] **GitHub Resolver:** Show repo description, stars, and language.
 *   [ ] **Social Media:** Better context for X (Twitter), LinkedIn, etc.
-*   [ ] **Enterprise (Future):** Potential integrations for private tools like Jira, Notion, or Linear.
+*   [ ] **Enterprise Pilot:** Integration for private tools (Jira, Linear, Notion) via self-hosted or authenticated resolvers.
 
 ## 3. Marketing & Messaging
 
@@ -55,6 +65,6 @@
 
 ## 4. Technical Constraints & Pillars
 *   **Design First:** Every roadmap item must have a distinct design phase producing an artifact (doc, schema, or prototype) before implementation begins.
-*   **Privacy First:** We resolve links, we don't track users.
+*   **Privacy First:** We resolve links, we don't track users. Logs never contain full URLs.
 *   **Low Latency:** Resolutions must happen in milliseconds.
 *   **Fail Open:** If the backend is down, the user just sees the original link. The web must not break.
