@@ -16,7 +16,7 @@ Every roadmap item follows this strict lifecycle:
 ### Core Mandates
 1.  **Single-Issue Focus:** Each Pull Request MUST address exactly one issue. Combining multiple features, bug fixes, or administrative tasks (like rebranding) into a single PR is strictly prohibited.
 2.  **Atomic Changes:** If a task requires changes across multiple domains (e.g., rebranding and a new feature), they must be split into separate issues and separate PRs.
-3.  **Design-Implementation Separation:** Coding (Implementation Phase) must NEVER begin until a corresponding Design Pull Request has been reviewed and MERGED into `master`.
+3.  **Design-Implementation Separation:** Coding (Implementation Phase) must NEVER begin until a corresponding Design Pull Request has been reviewed and MERGED into `main`.
 
 ```mermaid
 graph TD
@@ -32,9 +32,14 @@ graph TD
 ```
 
 ### 1. Branching Strategy
+
 We use a **Feature Branch** workflow.
-*   **`master`**: The protected, deployable state of the product. Direct commits are blocked.
-*   **`feat/issue-ID-description`**: For implementation tasks (e.g., `feat/13-rate-limiter`).
+
+*   **`main`**: The protected, deployable state of the product. Direct commits are blocked.
+
+*   **`feat/issue-ID-description`**:
+
+ For implementation tasks (e.g., `feat/13-rate-limiter`).
 *   **`design/issue-ID-description`**: For design tasks (e.g., `design/12-github-strategy`).
 *   **`fix/issue-ID-description`**: For bug fixes.
 
@@ -60,14 +65,14 @@ We support three levels of human intervention, configured per-repo or per-agent 
 
 | Level | Description | Best For |
 | :--- | :--- | :--- |
-| **1. Post-Hoc Review** | Agent commits directly to `master`. | *Documentation updates, minor tweaks.* |
+| **1. Post-Hoc Review** | Agent commits directly to `main`. | *Documentation updates, minor tweaks.* |
 | **2. PR Gate (Default)** | Agent opens PR, waits for human merge. | *Standard features, bug fixes.* |
 | **3. Approval Gate** | Agent pauses *before* starting implementation to get plan approval. | *Architectural changes, new product features.* |
 
 **Current Configuration:** **Level 2 (PR Gate)** is the default for all code changes.
 
 ### 4. Conflict Resolution
-*   **Rebase First:** Agents should rebase their feature branch on `origin/master` before opening a PR.
+*   **Rebase First:** Agents should rebase their feature branch on `origin/main` before opening a PR.
 *   **Force Push (Lease):** If a rebase is required, use `--force-with-lease`.
 *   **Stale Branches:** If a branch is inactive for >7 days and conflicts, it should be archived or deleted.
 
