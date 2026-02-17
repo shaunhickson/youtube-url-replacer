@@ -32,7 +32,7 @@ class LinkLensOptimizer {
             if (namespace === 'local') {
                 for (const [key, { newValue }] of Object.entries(changes)) {
                     if (key in this.settings) {
-                        this.settings = { ...this.settings, [key]: newValue };
+                        this.settings = { ...this.settings, [key as keyof Settings]: newValue };
                     }
                 }
             }
@@ -142,7 +142,7 @@ class LinkLensOptimizer {
         const urlsToFetch = [...new Set(currentBatch.map(l => l.url))];
 
         try {
-            const response = await fetch('https://youtube-replacer-backend-542312799814.us-east1.run.app/resolve', {
+            const response = await fetch(this.settings.apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ urls: urlsToFetch })
@@ -177,7 +177,7 @@ class LinkLensOptimizer {
                                 domain: getDomain(url),
                                 platform: platform
                             };
-                            uiManager.show(element, tooltipData);
+                            uiManager.show(element, tooltipData, this.settings.theme);
                         }, 500);
                     });
 

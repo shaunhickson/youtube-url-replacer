@@ -31,17 +31,46 @@ class UIManager {
 
         this.shadow = this.host.attachShadow({ mode: 'closed' });
         
-        // Inject Styles
+        // Inject Styles with CSS variables for theming
         const style = document.createElement('style');
         style.textContent = `
+            :host {
+                --ll-bg: #ffffff;
+                --ll-text: #333333;
+                --ll-header: #888888;
+                --ll-title: #000000;
+                --ll-border: #eeeeee;
+                --ll-shadow: rgba(0,0,0,0.15);
+            }
+
+            .tooltip.dark {
+                --ll-bg: #1e1e1e;
+                --ll-text: #cccccc;
+                --ll-header: #aaaaaa;
+                --ll-title: #ffffff;
+                --ll-border: #333333;
+                --ll-shadow: rgba(0,0,0,0.5);
+            }
+
+            @media (prefers-color-scheme: dark) {
+                .tooltip.system {
+                    --ll-bg: #1e1e1e;
+                    --ll-text: #cccccc;
+                    --ll-header: #aaaaaa;
+                    --ll-title: #ffffff;
+                    --ll-border: #333333;
+                    --ll-shadow: rgba(0,0,0,0.5);
+                }
+            }
+
             .tooltip {
                 position: absolute;
                 z-index: 1000000;
-                background: #ffffff;
-                color: #333333;
+                background: var(--ll-bg);
+                color: var(--ll-text);
                 padding: 12px;
                 border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                box-shadow: 0 4px 12px var(--ll-shadow);
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
                 font-size: 14px;
                 line-height: 1.4;
@@ -49,7 +78,7 @@ class UIManager {
                 pointer-events: none;
                 opacity: 0;
                 transition: opacity 0.2s ease-in-out;
-                border: 1px solid #eeeeee;
+                border: 1px solid var(--ll-border);
                 visibility: hidden;
             }
             .tooltip.visible {
@@ -60,14 +89,14 @@ class UIManager {
                 font-size: 11px;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
-                color: #888888;
+                color: var(--ll-header);
                 margin-bottom: 4px;
                 display: flex;
                 align-items: center;
             }
             .title {
                 font-weight: 600;
-                color: #000000;
+                color: var(--ll-title);
                 margin-bottom: 6px;
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
@@ -76,7 +105,7 @@ class UIManager {
             }
             .description {
                 font-size: 13px;
-                color: #666666;
+                color: var(--ll-text);
                 display: -webkit-box;
                 -webkit-line-clamp: 3;
                 -webkit-box-orient: vertical;
@@ -95,7 +124,7 @@ class UIManager {
         this.shadow.appendChild(this.tooltip);
     }
 
-    public show(target: HTMLElement, data: TooltipData) {
+    public show(target: HTMLElement, data: TooltipData, theme: string = 'system') {
         if (!this.tooltip) return;
 
         const rect = target.getBoundingClientRect();
@@ -109,6 +138,10 @@ class UIManager {
             <div class="title">${this.escape(data.title)}</div>
             ${data.description ? `<div class="description">${this.escape(data.description)}</div>` : ''}
         `;
+
+        // Apply theme classes
+        this.tooltip.classList.remove('light', 'dark', 'system');
+        this.tooltip.classList.add(theme);
 
         // Position
         const top = rect.bottom + scrollY + 8;
