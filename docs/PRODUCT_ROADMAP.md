@@ -30,6 +30,7 @@ The modern web is cluttered with opaque identifiers: shortened links (`bit.ly/xy
 *   [x] **Security Audit:** Harden the system against SSRF and XSS (Issue #10, #33).
 *   [x] **Observability:** Structured JSON logging for Cloud Run (Issue #15).
 *   [x] **DevEx:** Comprehensive Makefile targets (Issue #16).
+*   [ ] **Project README:** Comprehensive getting started guide and architecture docs (Issue #41).
 *   [x] **Collaboration Strategy:** Define how agents and humans work together (Issue #12).
 
 ### Phase 2: The "Universal" Pivot (Current Focus)
@@ -41,6 +42,7 @@ The modern web is cluttered with opaque identifiers: shortened links (`bit.ly/xy
 *   [ ] **Frontend Optimization:** Efficient DOM scanning (Issue #17).
 *   [ ] **Privacy Controls:** Allow/Block lists for domains (Issue #19).
 *   [ ] **URL Unshortener:** Automatically unwrap `bit.ly`, `t.co`, etc., to show the final destination.
+*   [ ] **Marketing Website:** Landing page with live demo, features, and download links (Issue #39).
 *   [ ] **Visual Update:** Extension UI/UX improvements to differentiate link types (icons, tooltips).
 
 ### Phase 3: Deep Integrations & Enterprise Value
