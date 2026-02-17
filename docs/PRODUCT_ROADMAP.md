@@ -30,15 +30,15 @@ The modern web is cluttered with opaque identifiers: shortened links (`bit.ly/xy
 *   [x] **Security Audit:** Harden the system against SSRF and XSS (Issue #10, #33).
 *   [x] **Observability:** Structured JSON logging for Cloud Run (Issue #15).
 *   [x] **DevEx:** Comprehensive Makefile targets (Issue #16).
-*   [ ] **Project README:** Comprehensive getting started guide and architecture docs (Issue #41).
+*   [x] **Project README:** Comprehensive getting started guide and architecture docs (Issue #41).
 *   [x] **Collaboration Strategy:** Define how agents and humans work together (Issue #12).
 
 ### Phase 2: The "Universal" Pivot (Current Focus)
 *Goal: Move beyond YouTube to support the wider web.*
 
-*   [ ] **Modular Architecture:** Refactor backend to support pluggable resolvers (See `docs/DESIGN_MODULAR_RESOLVER.md`).
-*   [ ] **Generic OpenGraph Resolver:** "Catch-all" support for any website with `og:title` tags.
-*   [ ] **Universal Link Detection:** Heuristics to identify "raw" URLs in text without false positives (Issue #18).
+*   [x] **Modular Architecture:** Refactor backend to support pluggable resolvers (See `docs/DESIGN_MODULAR_RESOLVER.md`).
+*   [x] **Generic OpenGraph Resolver:** "Catch-all" support for any website with `og:title` tags.
+*   [x] **Universal Link Detection:** Heuristics to identify "raw" URLs in text without false positives (Issue #18).
 *   [ ] **Frontend Optimization:** Efficient DOM scanning (Issue #17).
 *   [ ] **Privacy Controls:** Allow/Block lists for domains (Issue #19).
 *   [ ] **URL Unshortener:** Automatically unwrap `bit.ly`, `t.co`, etc., to show the final destination.
