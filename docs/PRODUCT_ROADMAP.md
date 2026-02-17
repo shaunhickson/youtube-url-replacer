@@ -41,6 +41,7 @@ The modern web is cluttered with opaque identifiers: shortened links (`bit.ly/xy
 *   [ ] **Frontend Optimization:** Efficient DOM scanning (Issue #17).
 *   [ ] **Privacy Controls:** Allow/Block lists for domains (Issue #19).
 *   [ ] **URL Unshortener:** Automatically unwrap `bit.ly`, `t.co`, etc., to show the final destination.
+*   [ ] **Marketing Website:** Landing page with live demo, features, and download links (Issue #39).
 *   [ ] **Visual Update:** Extension UI/UX improvements to differentiate link types (icons, tooltips).
 
 ### Phase 3: Deep Integrations & Enterprise Value
