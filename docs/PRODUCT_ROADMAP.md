@@ -39,7 +39,7 @@ The modern web is cluttered with opaque identifiers: shortened links (`bit.ly/xy
 *   [x] **Modular Architecture:** Refactor backend to support pluggable resolvers (See `docs/DESIGN_MODULAR_RESOLVER.md`).
 *   [x] **Generic OpenGraph Resolver:** "Catch-all" support for any website with `og:title` tags.
 *   [x] **Universal Link Detection:** Heuristics to identify "raw" URLs in text without false positives (Issue #18).
-*   [ ] **Frontend Optimization:** Efficient DOM scanning (Issue #17).
+*   [x] **Frontend Optimization:** Efficient DOM scanning (Issue #17).
 *   [ ] **Privacy Controls:** Allow/Block lists for domains (Issue #19).
 *   [x] **URL Unshortener:** Automatically unwrap `bit.ly`, `t.co`, etc., to show the final destination.
 *   [ ] **Marketing Website:** Landing page with live demo, features, and download links (Issue #39).

@@ -2,74 +2,143 @@ import { isRawUrl, isYouTube } from './utils/url';
 
 console.log("LinkLens Content Script Loaded");
 
-// Cache processed links to avoid re-fetching
-const processedLinks = new Set<string>();
+interface PendingLink {
+    element: HTMLAnchorElement;
+    url: string;
+    isYT: boolean;
+}
 
-async function scanAndReplace() {
-    const links = Array.from(document.querySelectorAll('a'));
-    const pendingLinks: { element: HTMLAnchorElement; url: string; isYT: boolean }[] = [];
-    const urlsToFetch: string[] = [];
+class LinkLensOptimizer {
+    private processedLinks = new Set<string>();
+    private pendingResolutions = new Set<string>();
+    private scanScheduled = false;
+    private batchTimeout: ReturnType<typeof setTimeout> | null = null;
+    private linksToProcess: PendingLink[] = [];
 
-    // 1. Identify valid, unprocessed "raw" links
-    links.forEach(link => {
-        // Skip if already processed
-        if (processedLinks.has(link.href)) return;
+    constructor() {
+        this.init();
+    }
 
-        const href = link.href;
-        const text = link.innerText.trim();
+    private init() {
+        // Initial scan of the whole body
+        this.enqueueLinks(Array.from(document.querySelectorAll('a')));
 
-        // Heuristic: If text looks like a URL, it's a candidate
-        if (isRawUrl(text)) {
-            const isYT = isYouTube(href);
-            pendingLinks.push({ element: link, url: href, isYT });
-            urlsToFetch.push(href);
-            processedLinks.add(href); // Mark as seen
-        }
-    });
+        // Setup MutationObserver for targeted scans
+        const observer = new MutationObserver((mutations) => {
+            const newLinks: HTMLAnchorElement[] = [];
+            
+            for (const mutation of mutations) {
+                for (const node of Array.from(mutation.addedNodes)) {
+                    if (node instanceof HTMLElement) {
+                        // If it's a link, add it
+                        if (node instanceof HTMLAnchorElement) {
+                            newLinks.push(node);
+                        }
+                        // Also find links inside the added node
+                        const nestedLinks = node.querySelectorAll('a');
+                        nestedLinks.forEach(l => newLinks.push(l));
+                    }
+                }
+            }
 
-    if (urlsToFetch.length === 0) return;
-
-    // 2. Fetch titles from backend
-    try {
-        const uniqueUrls = [...new Set(urlsToFetch)];
-        const response = await fetch('https://youtube-replacer-backend-542312799814.us-east1.run.app/resolve', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ urls: uniqueUrls })
-        });
-
-        if (!response.ok) {
-            console.error('Failed to fetch titles:', response.statusText);
-            return;
-        }
-
-        const data = await response.json();
-        const titles = data.titles || {};
-
-        // 3. Update DOM
-        pendingLinks.forEach(({ element, url, isYT }) => {
-            if (titles[url]) {
-                const title = titles[url];
-                const prefix = isYT ? "[YT] " : "";
-                element.innerText = `${prefix}${title}`;
-                element.title = title; // Also set tooltip
+            if (newLinks.length > 0) {
+                this.enqueueLinks(newLinks);
             }
         });
 
-    } catch (err) {
-        console.error('Error resolving titles:', err);
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    private enqueueLinks(links: HTMLAnchorElement[]) {
+        let addedAny = false;
+        
+        links.forEach(link => {
+            const href = link.href;
+            if (this.processedLinks.has(href) || this.pendingResolutions.has(href)) {
+                return;
+            }
+
+            const text = link.innerText.trim();
+            if (isRawUrl(text)) {
+                this.linksToProcess.push({
+                    element: link,
+                    url: href,
+                    isYT: isYouTube(href)
+                });
+                this.pendingResolutions.add(href);
+                addedAny = true;
+            }
+        });
+
+        if (addedAny) {
+            this.scheduleBatch();
+        }
+    }
+
+    private scheduleBatch() {
+        if (this.scanScheduled) return;
+        this.scanScheduled = true;
+
+        const runScan = () => {
+            if (this.batchTimeout) clearTimeout(this.batchTimeout);
+            
+            this.batchTimeout = setTimeout(() => {
+                this.processBatch();
+                this.scanScheduled = false;
+            }, 500); // Batch every 500ms
+        };
+
+        if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(() => runScan(), { timeout: 2000 });
+        } else {
+            setTimeout(runScan, 100);
+        }
+    }
+
+    private async processBatch() {
+        if (this.linksToProcess.length === 0) return;
+
+        const currentBatch = [...this.linksToProcess];
+        this.linksToProcess = [];
+
+        const urlsToFetch = [...new Set(currentBatch.map(l => l.url))];
+
+        try {
+            const response = await fetch('https://youtube-replacer-backend-542312799814.us-east1.run.app/resolve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ urls: urlsToFetch })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Backend returned ${response.status}`);
+            }
+
+            const data = await response.json();
+            const titles = data.titles || {};
+
+            currentBatch.forEach(({ element, url, isYT }) => {
+                this.pendingResolutions.delete(url);
+                this.processedLinks.add(url);
+
+                if (titles[url]) {
+                    const title = titles[url];
+                    const prefix = isYT ? "[YT] " : "";
+                    element.innerText = `${prefix}${title}`;
+                    element.title = title;
+                }
+            });
+
+        } catch (err) {
+            console.error('LinkLens: Error resolving batch:', err);
+            // Cleanup pending so they can be retried in next scan if mutation occurs
+            currentBatch.forEach(({ url }) => this.pendingResolutions.delete(url));
+        }
     }
 }
 
-// Initial scan
-scanAndReplace();
-
-// Observe DOM for infinite scrolling / dynamic content
-let timeout: ReturnType<typeof setTimeout> | undefined;
-const observer = new MutationObserver(() => {
-    // Debounce to avoid spamming on every tiny DOM change
-    clearTimeout(timeout);
-    timeout = setTimeout(scanAndReplace, 1000);
-});
-
-observer.observe(document.body, { childList: true, subtree: true });
+// Start the optimizer
+new LinkLensOptimizer();
