@@ -48,7 +48,7 @@ The modern web is cluttered with opaque identifiers: shortened links (`bit.ly/xy
 ### Phase 3: Deep Integrations & Enterprise Value
 *Goal: Provide specific, high-value data for popular platforms and teams.*
 
-*   [ ] **GitHub Resolver:** Show repo description, stars, and language.
+*   [x] **GitHub Resolver:** Show repo description, stars, and language.
 *   [ ] **Social Media:** Better context for X (Twitter), LinkedIn, etc.
 *   [ ] **Enterprise Pilot:** Integration for private tools (Jira, Linear, Notion) via self-hosted or authenticated resolvers.
 
