@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Popup from './Popup';
 
@@ -9,11 +9,17 @@ const chromeMock = {
       get: vi.fn(),
       set: vi.fn(),
     },
+    onChanged: {
+      addListener: vi.fn(),
+    }
   },
   tabs: {
     query: vi.fn(),
     reload: vi.fn(),
   },
+  runtime: {
+    openOptionsPage: vi.fn(),
+  }
 };
 
 global.chrome = chromeMock as unknown as typeof chrome;
@@ -23,28 +29,44 @@ describe('Popup', () => {
     vi.clearAllMocks();
   });
 
-  it('renders correctly', () => {
+  it('renders correctly', async () => {
     // Mock storage get to return default
     chromeMock.storage.local.get.mockImplementation((keys, callback) => {
-      callback({ enabled: true });
+      callback({ enabled: true, domainList: [], filterMode: 'blocklist', matchSubdomains: true });
+    });
+    chromeMock.tabs.query.mockImplementation((query, callback) => {
+        callback([{ url: 'https://example.com' }]);
     });
 
-    render(<Popup />);
+    await act(async () => {
+        render(<Popup />);
+    });
     
-    expect(screen.getByText('YouTube Replacer')).toBeInTheDocument();
+    expect(screen.getByText('LinkLens')).toBeInTheDocument();
     expect(screen.getByText('Active')).toBeInTheDocument();
   });
 
-  it('toggles switch', () => {
+  it('toggles switch', async () => {
     chromeMock.storage.local.get.mockImplementation((keys, callback) => {
-      callback({ enabled: true });
+      callback({ enabled: true, domainList: [], filterMode: 'blocklist', matchSubdomains: true });
+    });
+    chromeMock.tabs.query.mockImplementation((query, callback) => {
+        callback([{ id: 1, url: 'https://example.com' }]);
     });
 
-    render(<Popup />);
+    await act(async () => {
+        render(<Popup />);
+    });
     
-    const checkbox = screen.getByRole('checkbox');
-    fireEvent.click(checkbox);
+    const checkboxes = screen.getAllByRole('checkbox');
+    // Global toggle is the first one
+    await act(async () => {
+        fireEvent.click(checkboxes[0]);
+    });
     
-    expect(chromeMock.storage.local.set).toHaveBeenCalledWith({ enabled: false });
+    expect(chromeMock.storage.local.set).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: false }),
+        expect.any(Function)
+    );
   });
 });
