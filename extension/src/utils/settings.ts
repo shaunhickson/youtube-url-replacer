@@ -65,7 +65,7 @@ export function getDomain(url: string): string {
     try {
         const u = new URL(url);
         return u.hostname;
-    } catch (e) {
+    } catch {
         return '';
     }
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './Popup.css'; // Reuse basic styles
-import { getSettings, saveSettings, Settings, DEFAULT_SETTINGS } from './utils/settings';
+import { getSettings, saveSettings, Settings, DEFAULT_SETTINGS, FilterMode } from './utils/settings';
 
 const Options: React.FC = () => {
     const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
@@ -46,7 +46,7 @@ const Options: React.FC = () => {
                     </div>
                     <select 
                         value={settings.filterMode} 
-                        onChange={(e) => handleSave({ filterMode: e.target.value as any })}
+                        onChange={(e) => handleSave({ filterMode: e.target.value as FilterMode })}
                         style={{ padding: '4px' }}
                     >
                         <option value="blocklist">Blocklist</option>

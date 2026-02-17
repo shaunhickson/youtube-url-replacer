@@ -29,10 +29,10 @@ class LinkLensOptimizer {
         chrome.storage.onChanged.addListener((changes, namespace) => {
             if (namespace === 'local') {
                 for (const [key, { newValue }] of Object.entries(changes)) {
-                    (this.settings as any)[key] = newValue;
+                    if (key in this.settings) {
+                        this.settings = { ...this.settings, [key]: newValue };
+                    }
                 }
-                // If extension was disabled, we might want to stop, but for now
-                // we'll just respect the new settings in the next scan.
             }
         });
 
