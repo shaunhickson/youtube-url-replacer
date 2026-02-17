@@ -18,14 +18,18 @@ type ResolveResponse struct {
 }
 
 type Handler struct {
-	cache    resolvers.Cache
-	manager  *resolvers.ResolverManager
+	cache        resolvers.Cache
+	manager      *resolvers.ResolverManager
+	MaxBodyBytes int64
+	MaxItems     int
 }
 
 func NewHandler(cache resolvers.Cache, manager *resolvers.ResolverManager) *Handler {
 	return &Handler{
-		cache:   cache,
-		manager: manager,
+		cache:        cache,
+		manager:      manager,
+		MaxBodyBytes: 10 * 1024, // Default 10KB
+		MaxItems:     50,        // Default 50 items
 	}
 }
 
@@ -44,13 +48,27 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 1. Limit Body Size
+	r.Body = http.MaxBytesReader(w, r.Body, h.MaxBodyBytes)
+
 	var req ResolveRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		if err.Error() == "http: request body too large" {
+			http.Error(w, "Request body too large", http.StatusRequestEntityTooLarge)
+		} else {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+		}
 		return
 	}
 
-	if len(req.VideoIDs) == 0 && len(req.URLs) == 0 {
+	// 2. Limit Item Count
+	totalItems := len(req.VideoIDs) + len(req.URLs)
+	if totalItems > h.MaxItems {
+		http.Error(w, "Too many items in request", http.StatusRequestEntityTooLarge)
+		return
+	}
+
+	if totalItems == 0 {
 		json.NewEncoder(w).Encode(ResolveResponse{Titles: map[string]string{}})
 		return
 	}
