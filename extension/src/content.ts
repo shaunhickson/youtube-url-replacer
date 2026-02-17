@@ -1,4 +1,5 @@
 import { isRawUrl, isYouTube } from './utils/url';
+import { getSettings, isDomainAllowed, getDomain, Settings, DEFAULT_SETTINGS } from './utils/settings';
 
 console.log("LinkLens Content Script Loaded");
 
@@ -14,17 +15,43 @@ class LinkLensOptimizer {
     private scanScheduled = false;
     private batchTimeout: ReturnType<typeof setTimeout> | null = null;
     private linksToProcess: PendingLink[] = [];
+    private settings: Settings = DEFAULT_SETTINGS;
 
     constructor() {
         this.init();
     }
 
-    private init() {
+    private async init() {
+        // Load initial settings
+        this.settings = await getSettings();
+        
+        // Listen for settings changes
+        chrome.storage.onChanged.addListener((changes, namespace) => {
+            if (namespace === 'local') {
+                for (const [key, { newValue }] of Object.entries(changes)) {
+                    if (key in this.settings) {
+                        this.settings = { ...this.settings, [key]: newValue };
+                    }
+                }
+            }
+        });
+
+        // Check if current site is allowed before doing anything
+        const currentDomain = getDomain(window.location.href);
+        if (!isDomainAllowed(currentDomain, this.settings)) {
+            console.log(`LinkLens: Domain ${currentDomain} is blocked by user settings.`);
+            return;
+        }
+
         // Initial scan of the whole body
         this.enqueueLinks(Array.from(document.querySelectorAll('a')));
 
         // Setup MutationObserver for targeted scans
         const observer = new MutationObserver((mutations) => {
+            // Re-check global enabled status
+            if (!this.settings.enabled) return;
+            if (!isDomainAllowed(currentDomain, this.settings)) return;
+
             const newLinks: HTMLAnchorElement[] = [];
             
             for (const mutation of mutations) {
@@ -58,6 +85,12 @@ class LinkLensOptimizer {
         links.forEach(link => {
             const href = link.href;
             if (this.processedLinks.has(href) || this.pendingResolutions.has(href)) {
+                return;
+            }
+
+            // Check if the target link domain is allowed
+            const targetDomain = getDomain(href);
+            if (!isDomainAllowed(targetDomain, this.settings)) {
                 return;
             }
 

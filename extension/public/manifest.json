@@ -1,12 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "YouTube URL Replacer",
+  "name": "LinkLens",
   "version": "1.0.0",
-  "description": "Replaces YouTube URLs with video titles.",
+  "description": "Make the web transparent by resolving opaque URLs into clear titles.",
   "permissions": [
     "activeTab",
     "scripting",
-    "storage"
+    "storage",
+    "tabs"
   ],
   "host_permissions": [
     "http://*/*",
@@ -19,6 +20,10 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
   },
   "background": {
     "service_worker": "assets/background.js",
