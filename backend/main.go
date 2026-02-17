@@ -101,6 +101,12 @@ func main() {
 		manager.Register(resolvers.NewUnshortenerResolver(manager))
 	}
 
+	// Register GitHub Resolver
+	if isEnabled("github") {
+		githubToken := os.Getenv("GITHUB_TOKEN")
+		manager.Register(resolvers.NewGitHubResolver(githubToken))
+	}
+
 	// Register OpenGraph Resolver (Fallback)
 	if isEnabled("opengraph") {
 		manager.Register(resolvers.NewOpenGraphResolver())
