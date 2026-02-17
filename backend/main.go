@@ -9,8 +9,18 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/sph/youtube-url-replacer/backend/middleware"
 	"github.com/sph/youtube-url-replacer/backend/resolvers"
 )
+
+func getEnvInt(key string, defaultVal int) int {
+	if valStr := os.Getenv(key); valStr != "" {
+		if val, err := strconv.Atoi(valStr); err == nil {
+			return val
+		}
+	}
+	return defaultVal
+}
 
 func main() {
 	// Load .env file if it exists
@@ -24,6 +34,13 @@ func main() {
 	}
 
 	apiKey := os.Getenv("YOUTUBE_API_KEY")
+
+	// Initialize Rate Limiter
+	rpm := getEnvInt("RATE_LIMIT_RPM", 60)
+	burst := getEnvInt("RATE_LIMIT_BURST", 20)
+	rateLimiter := middleware.NewRateLimiter(rpm, burst)
+	// Clean up old visitors every minute, expire after 3 minutes
+	rateLimiter.CleanupBackground(1*time.Minute, 3*time.Minute)
 
 	// Initialize Cache (Firestore or Memory)
 	var cache resolvers.Cache
@@ -79,9 +96,11 @@ func main() {
 	}
 
 	handler := NewHandler(cache, manager)
+	handler.MaxItems = getEnvInt("MAX_ITEMS_PER_REQUEST", 50)
+	handler.MaxBodyBytes = int64(getEnvInt("MAX_BODY_BYTES", 10240))
 
 	// Set up routes
-	http.Handle("/resolve", handler)
+	http.Handle("/resolve", rateLimiter.Middleware(handler))
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
