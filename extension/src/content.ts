@@ -1,5 +1,6 @@
 import { isRawUrl, isYouTube } from './utils/url';
 import { getSettings, isDomainAllowed, getDomain, Settings, DEFAULT_SETTINGS } from './utils/settings';
+import { uiManager, ICONS, TooltipData } from './utils/ui';
 
 console.log("LinkLens Content Script Loaded");
 
@@ -16,6 +17,7 @@ class LinkLensOptimizer {
     private batchTimeout: ReturnType<typeof setTimeout> | null = null;
     private linksToProcess: PendingLink[] = [];
     private settings: Settings = DEFAULT_SETTINGS;
+    private hoverTimeout: ReturnType<typeof setTimeout> | null = null;
 
     constructor() {
         this.init();
@@ -152,6 +154,7 @@ class LinkLensOptimizer {
 
             const data = await response.json();
             const titles = data.titles || {};
+            const details = data.details || {}; // Future-proofing for rich data
 
             currentBatch.forEach(({ element, url, isYT }) => {
                 this.pendingResolutions.delete(url);
@@ -159,9 +162,29 @@ class LinkLensOptimizer {
 
                 if (titles[url]) {
                     const title = titles[url];
-                    const prefix = isYT ? "[YT] " : "";
-                    element.innerText = `${prefix}${title}`;
-                    element.title = title;
+                    const platform = isYT ? 'youtube' : 'generic';
+                    const iconSvg = ICONS[platform as keyof typeof ICONS] || ICONS.generic;
+                    
+                    // Inject Icon and update text
+                    element.innerHTML = `${iconSvg}<span>${title}</span>`;
+                    
+                    // Attach Hover for Rich Tooltip
+                    element.addEventListener('mouseenter', () => {
+                        this.hoverTimeout = setTimeout(() => {
+                            const tooltipData: TooltipData = {
+                                title: title,
+                                description: details[url]?.description,
+                                domain: getDomain(url),
+                                platform: platform
+                            };
+                            uiManager.show(element, tooltipData);
+                        }, 500);
+                    });
+
+                    element.addEventListener('mouseleave', () => {
+                        if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
+                        uiManager.hide();
+                    });
                 }
             });
 

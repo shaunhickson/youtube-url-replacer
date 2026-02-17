@@ -51,8 +51,8 @@ func TestResolverManager(t *testing.T) {
 	
 	results := manager.ResolveMulti(ctx, urls)
 	
-	if results["https://example.com/1"] != "Title 1" {
-		t.Errorf("Expected Title 1, got %s", results["https://example.com/1"])
+	if results["https://example.com/1"].Title != "Title 1" {
+		t.Errorf("Expected Title 1, got %s", results["https://example.com/1"].Title)
 	}
 
 	// Check cache

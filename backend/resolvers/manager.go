@@ -50,7 +50,7 @@ func (m *ResolverManager) resolveRecursively(ctx context.Context, u *url.URL, sk
 	return nil, fmt.Errorf("no resolver found for %s", u.String())
 }
 
-func (m *ResolverManager) ResolveMulti(ctx context.Context, urls []string) map[string]string {
+func (m *ResolverManager) ResolveMulti(ctx context.Context, urls []string) map[string]*Result {
 	// Apply global timeout if not already set on context
 	if m.timeout > 0 {
 		var cancel context.CancelFunc
@@ -58,14 +58,15 @@ func (m *ResolverManager) ResolveMulti(ctx context.Context, urls []string) map[s
 		defer cancel()
 	}
 
-	results := make(map[string]string)
+	results := make(map[string]*Result)
 	var missingURLs []string
 
-	// 1. Check Cache
+	// 1. Check Cache (Note: current cache only stores title strings, 
+	// we may want to upgrade this later to store JSON of Result)
 	cached := m.cache.GetMulti(urls)
 	for _, u := range urls {
 		if val, ok := cached[u]; ok {
-			results[u] = val
+			results[u] = &Result{Title: val}
 		} else {
 			missingURLs = append(missingURLs, u)
 		}
@@ -100,7 +101,7 @@ func (m *ResolverManager) ResolveMulti(ctx context.Context, urls []string) map[s
 
 					if res != nil && res.Title != "" {
 						mu.Lock()
-						results[raw] = res.Title
+						results[raw] = res
 						m.cache.Set(raw, res.Title)
 						mu.Unlock()
 						return
@@ -126,8 +127,8 @@ func (m *ResolverManager) ResolveVideoIDs(ctx context.Context, ids []string) map
 
 	urlResults := m.ResolveMulti(ctx, urls)
 	results := make(map[string]string)
-	for u, title := range urlResults {
-		results[idMap[u]] = title
+	for u, res := range urlResults {
+		results[idMap[u]] = res.Title
 	}
 	return results
 }
