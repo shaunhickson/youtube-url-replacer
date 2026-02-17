@@ -28,6 +28,16 @@ func TestHandler_Limits(t *testing.T) {
 		}
 	})
 
+	t.Run("Valid Request with URLs", func(t *testing.T) {
+		body := `{"urls": ["https://example.com"]}`
+		req := httptest.NewRequest("POST", "/resolve", strings.NewReader(body))
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, req)
+		if w.Code != http.StatusOK {
+			t.Errorf("Expected 200, got %d", w.Code)
+		}
+	})
+
 	t.Run("Too Many Items", func(t *testing.T) {
 		body := `{"videoIds": ["1", "2", "3"]}` // 3 items > MaxItems 2
 		req := httptest.NewRequest("POST", "/resolve", strings.NewReader(body))
