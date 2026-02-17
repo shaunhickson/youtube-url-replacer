@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isDomainAllowed, Settings } from './settings';
+import { isDomainAllowed, Settings, getDomain } from './settings';
 
 describe('Settings Utilities', () => {
     const baseSettings: Settings = {
@@ -7,7 +7,20 @@ describe('Settings Utilities', () => {
         filterMode: 'blocklist',
         domainList: ['example.com'],
         matchSubdomains: true,
+        apiUrl: 'https://test.com/resolve',
+        theme: 'system',
     };
+
+    describe('getDomain', () => {
+        it('extracts hostname from valid URLs', () => {
+            expect(getDomain('https://google.com/search')).toBe('google.com');
+            expect(getDomain('http://sub.test.org')).toBe('sub.test.org');
+        });
+
+        it('returns empty string for invalid URLs', () => {
+            expect(getDomain('not-a-url')).toBe('');
+        });
+    });
 
     describe('isDomainAllowed', () => {
         it('blocks domains in blocklist mode', () => {

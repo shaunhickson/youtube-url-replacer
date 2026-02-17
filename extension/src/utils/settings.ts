@@ -1,10 +1,13 @@
 export type FilterMode = 'blocklist' | 'allowlist';
+export type Theme = 'light' | 'dark' | 'system';
 
 export interface Settings {
     enabled: boolean;
     filterMode: FilterMode;
     domainList: string[];
     matchSubdomains: boolean;
+    apiUrl: string;
+    theme: Theme;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -12,6 +15,8 @@ export const DEFAULT_SETTINGS: Settings = {
     filterMode: 'blocklist',
     domainList: [],
     matchSubdomains: true,
+    apiUrl: 'https://youtube-replacer-backend-542312799814.us-east1.run.app/resolve',
+    theme: 'system',
 };
 
 export async function getSettings(): Promise<Settings> {

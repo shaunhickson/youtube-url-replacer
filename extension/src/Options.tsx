@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import './Popup.css'; // Reuse basic styles
-import { getSettings, saveSettings, Settings, DEFAULT_SETTINGS, FilterMode } from './utils/settings';
+import { getSettings, saveSettings, Settings, DEFAULT_SETTINGS, FilterMode, Theme } from './utils/settings';
 
 const Options: React.FC = () => {
     const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
     const [newDomain, setNewDomain] = useState('');
+    const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
 
     useEffect(() => {
         getSettings().then(setSettings);
@@ -28,13 +29,73 @@ const Options: React.FC = () => {
         handleSave({ domainList: settings.domainList.filter(d => d !== domain) });
     };
 
+    const testConnection = async () => {
+        setTestStatus('testing');
+        try {
+            const healthUrl = settings.apiUrl.replace('/resolve', '/health');
+            const resp = await fetch(healthUrl);
+            if (resp.ok) {
+                setTestStatus('success');
+            } else {
+                setTestStatus('error');
+            }
+        } catch {
+            setTestStatus('error');
+        }
+        setTimeout(() => setTestStatus('idle'), 3000);
+    };
+
+    const resetApiUrl = () => {
+        handleSave({ apiUrl: DEFAULT_SETTINGS.apiUrl });
+    };
+
     return (
-        <div className="container" style={{ width: '400px', margin: '20px auto' }}>
+        <div className="container" style={{ width: '450px', margin: '20px auto' }}>
             <div className="header">
                 <h1>LinkLens Settings</h1>
             </div>
 
             <div className="content">
+                {/* Connection Section */}
+                <div className="card" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <div className="label-text">Backend Connection (Self-Hosting)</div>
+                    <input 
+                        type="text" 
+                        value={settings.apiUrl}
+                        onChange={(e) => handleSave({ apiUrl: e.target.value })}
+                        style={{ width: '100%', padding: '8px', marginTop: '8px', boxSizing: 'border-box' }}
+                    />
+                    <div style={{ marginTop: '8px', display: 'flex', gap: '8px', width: '100%' }}>
+                        <button onClick={testConnection} className="btn" disabled={testStatus === 'testing'} style={{ flex: 1, margin: 0 }}>
+                            {testStatus === 'idle' && 'Test Connection'}
+                            {testStatus === 'testing' && 'Testing...'}
+                            {testStatus === 'success' && '✅ Success!'}
+                            {testStatus === 'error' && '❌ Failed'}
+                        </button>
+                        <button onClick={resetApiUrl} className="btn" style={{ flex: 1, margin: 0, backgroundColor: '#888' }}>
+                            Reset to Default
+                        </button>
+                    </div>
+                </div>
+
+                {/* Appearance Section */}
+                <div className="card">
+                    <div>
+                        <div className="label-text">Tooltip Theme</div>
+                        <div className="status" style={{ fontSize: '12px' }}>Choose the look of your link tooltips</div>
+                    </div>
+                    <select 
+                        value={settings.theme} 
+                        onChange={(e) => handleSave({ theme: e.target.value as Theme })}
+                        style={{ padding: '4px' }}
+                    >
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="system">System Default</option>
+                    </select>
+                </div>
+
+                {/* Filtering Section */}
                 <div className="card">
                     <div>
                         <div className="label-text">Filtering Mode</div>

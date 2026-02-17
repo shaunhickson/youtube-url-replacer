@@ -32,7 +32,14 @@ describe('Popup', () => {
   it('renders correctly', async () => {
     // Mock storage get to return default
     chromeMock.storage.local.get.mockImplementation((keys, callback) => {
-      callback({ enabled: true, domainList: [], filterMode: 'blocklist', matchSubdomains: true });
+      callback({ 
+        enabled: true, 
+        domainList: [], 
+        filterMode: 'blocklist', 
+        matchSubdomains: true,
+        apiUrl: 'https://test.com/resolve',
+        theme: 'system'
+      });
     });
     chromeMock.tabs.query.mockImplementation((query, callback) => {
         callback([{ url: 'https://example.com' }]);
@@ -48,7 +55,14 @@ describe('Popup', () => {
 
   it('toggles switch', async () => {
     chromeMock.storage.local.get.mockImplementation((keys, callback) => {
-      callback({ enabled: true, domainList: [], filterMode: 'blocklist', matchSubdomains: true });
+      callback({ 
+        enabled: true, 
+        domainList: [], 
+        filterMode: 'blocklist', 
+        matchSubdomains: true,
+        apiUrl: 'https://test.com/resolve',
+        theme: 'system'
+      });
     });
     chromeMock.tabs.query.mockImplementation((query, callback) => {
         callback([{ id: 1, url: 'https://example.com' }]);
