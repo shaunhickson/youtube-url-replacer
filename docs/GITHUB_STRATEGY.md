@@ -14,8 +14,9 @@ This document defines the collaboration workflow for the **LinkLens** project, w
 Every roadmap item follows this strict lifecycle:
 
 ### Core Mandates
-1.  **Single-Issue Focus:** Each Pull Request MUST address exactly one issue. Combining multiple features or bug fixes into a single PR is prohibited.
-2.  **Design-Implementation Separation:** Coding (Implementation Phase) must NEVER begin until a corresponding Design Pull Request has been reviewed and MERGED into `master`.
+1.  **Single-Issue Focus:** Each Pull Request MUST address exactly one issue. Combining multiple features, bug fixes, or administrative tasks (like rebranding) into a single PR is strictly prohibited.
+2.  **Atomic Changes:** If a task requires changes across multiple domains (e.g., rebranding and a new feature), they must be split into separate issues and separate PRs.
+3.  **Design-Implementation Separation:** Coding (Implementation Phase) must NEVER begin until a corresponding Design Pull Request has been reviewed and MERGED into `master`.
 
 ```mermaid
 graph TD
