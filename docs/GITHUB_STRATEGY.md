@@ -13,11 +13,15 @@ This document defines the collaboration workflow for the **LinkLens** project, w
 
 Every roadmap item follows this strict lifecycle:
 
+### Core Mandates
+1.  **Single-Issue Focus:** Each Pull Request MUST address exactly one issue. Combining multiple features or bug fixes into a single PR is prohibited.
+2.  **Design-Implementation Separation:** Coding (Implementation Phase) must NEVER begin until a corresponding Design Pull Request has been reviewed and MERGED into `master`.
+
 ```mermaid
 graph TD
     A[Backlog Item] -->|Agent: Design| B(Draft Design Doc)
     B -->|Agent: Self-Review| B2[Checklist Verified]
-    B2 -->|Human: Review| C{Approved?}
+    B2 -->|Human: Review| C{Approved & Merged?}
     C -->|No| B
     C -->|Yes| D[Agent: Implementation]
     D -->|Agent: Tests & Verification| E(Pull Request)
