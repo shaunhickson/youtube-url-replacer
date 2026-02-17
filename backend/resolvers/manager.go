@@ -31,6 +31,25 @@ func (m *ResolverManager) Register(r Resolver) {
 	m.resolvers = append(m.resolvers, r)
 }
 
+// resolveRecursively attempts to resolve a URL, skipping the caller to avoid infinite loops
+func (m *ResolverManager) resolveRecursively(ctx context.Context, u *url.URL, skipResolver string) (*Result, error) {
+	for _, r := range m.resolvers {
+		if r.Name() == skipResolver {
+			continue
+		}
+		if r.CanHandle(u) {
+			res, err := r.Resolve(ctx, u)
+			if err != nil {
+				continue
+			}
+			if res != nil {
+				return res, nil
+			}
+		}
+	}
+	return nil, fmt.Errorf("no resolver found for %s", u.String())
+}
+
 func (m *ResolverManager) ResolveMulti(ctx context.Context, urls []string) map[string]string {
 	// Apply global timeout if not already set on context
 	if m.timeout > 0 {

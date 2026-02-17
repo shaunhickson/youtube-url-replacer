@@ -22,6 +22,9 @@ var (
 	}
 
 	cidrs []*net.IPNet
+
+	// AllowLocalIPs should only be true during testing
+	AllowLocalIPs = false
 )
 
 func init() {
@@ -35,6 +38,9 @@ func init() {
 }
 
 func isPrivateIP(ip net.IP) bool {
+	if AllowLocalIPs {
+		return false
+	}
 	if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
 		return true
 	}

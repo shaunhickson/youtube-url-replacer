@@ -96,6 +96,11 @@ func main() {
 		manager.Register(ytResolver)
 	}
 
+	// Register Unshortener Resolver
+	if isEnabled("unshortener") {
+		manager.Register(resolvers.NewUnshortenerResolver(manager))
+	}
+
 	// Register OpenGraph Resolver (Fallback)
 	if isEnabled("opengraph") {
 		manager.Register(resolvers.NewOpenGraphResolver())
