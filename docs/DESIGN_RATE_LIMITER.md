@@ -1,58 +1,91 @@
-# Design: Rate Limiter for youtube_replacer Backend
+# Design: Rate Limiter for LinkLens Backend
 
 ## Overview
-Implement a middleware-based rate limiter to protect the `/resolve` endpoint from abuse, resource exhaustion, and DDoS attacks.
+Implement a multi-layered rate limiting strategy to protect the `/resolve` endpoint from abuse, resource exhaustion, and DDoS attacks. This design accounts for the new modular `ResolverManager` architecture capable of handling both legacy YouTube Video IDs and arbitrary URLs.
 
 ## Goals
-- Prevent single IP addresses from flooding the backend with requests.
-- Mitigate cache exhaustion/poisoning by limiting payload size.
-- Ensure the backend remains responsive for legitimate users.
-- Provide clear feedback (HTTP 429) when limits are exceeded.
+- **Availability:** Ensure the backend remains responsive for legitimate users.
+- **Fairness:** Prevent single IP addresses from monopolizing resources.
+- **Cost Control:** Limit the number of external API calls (YouTube, GitHub, etc.) triggered by a single request.
+- **Observability:** Provide clear feedback (HTTP 429) and metrics on blocked requests.
 
-## Attack Vectors
-1. **Endpoint Flooding:** Rapid-fire requests to `/resolve`.
-2. **Batch Abuse:** Large arrays of `videoIds` in a single request to force massive YouTube API calls.
-3. **Distributed Requests:** Many IPs making a moderate number of requests (partially mitigated by per-IP limits).
+## Attack Vectors & Mitigation
+| Vector | Mitigation Layer | Strategy |
+| :--- | :--- | :--- |
+| **Volumetric DDoS** | Layer 1: IP Rate Limit | Token Bucket (per IP) |
+| **Massive Payloads** | Layer 2: Body Size Limit | `http.MaxBytesReader` |
+| **Batch Abuse** | Layer 3: Item Count Limit | Max 50 items (`len(videoIds) + len(urls)`) |
 
-## Proposed Strategy
+## Proposed Implementation
 
-### 1. IP-based Rate Limiting (Middleware)
-Use a token bucket algorithm to limit requests per IP.
+### 1. IP-based Rate Limiting (Layer 1)
+Use a token bucket algorithm to limit requests per IP address.
 - **Library:** `golang.org/x/time/rate`
-- **Default Limit:** 60 requests per minute.
-- **Burst:** 20 requests.
-- **Storage:** In-memory LRU cache to track visitor states.
+- **Storage:** In-memory `sync.Map` or LRU cache (expiring old IPs to prevent memory leaks).
+- **Configuration:**
+    - `RATE_LIMIT_RPM`: Requests per minute (Default: **60**).
+    - `RATE_LIMIT_BURST`: Max burst size (Default: **20**).
 
-### 2. Payload Limitation
-Limit the number of Video IDs allowed in a single `/resolve` request.
-- **Max Video IDs:** 50 per request.
+**Behavior:**
+- Middleware extracts IP from `X-Forwarded-For` (since we run on Cloud Run) or `RemoteAddr`.
+- If limit exceeded: Immediate HTTP 429 response.
+
+### 2. Payload Limitation (Layers 2 & 3)
+
+**Body Size:**
+- Enforce a strict limit on the request body size (e.g., 10KB) to prevent memory exhaustion before parsing.
+
+**Item Count:**
+- The `ResolveRequest` struct contains both `videoIds` and `urls`.
+- The handler must validate that `len(req.VideoIDs) + len(req.URLs) <= MAX_ITEMS_PER_REQUEST`.
+- **Default Limit:** **50** items total per request.
 
 ### 3. Response Headers
-Include standard rate-limiting headers:
-- `X-RateLimit-Limit`
-- `X-RateLimit-Remaining`
-- `X-RateLimit-Reset`
-- `Retry-After` (on 429)
+Conform to RFC 6585 and common standards:
+- `X-RateLimit-Limit`: The request limit per minute.
+- `X-RateLimit-Remaining`: Requests left in the current window.
+- `X-RateLimit-Reset`: Seconds until the limit resets.
+- `Retry-After`: Seconds to wait before retrying (only on 429).
 
-## Technical Implementation
+### 4. Code Structure
 
-### Middleware Components
-A new file `backend/middleware.go` will be created:
-- `RateLimiter`: A struct managing the visitor map and limits.
-- `LimitMiddleware`: A function that wraps `http.Handler` and performs the check.
+We will introduce a new package or file `backend/middleware/ratelimit.go` (or keep simple in `backend/middleware.go`).
 
-### Handling 429
-When a limit is reached, return:
-- **Status Code:** `429 Too Many Requests`
-- **Body:** `{"error": "Too many requests. Please try again later."}`
+```go
+package main
 
-### Configuration
-Add the following environment variables:
-- `RATE_LIMIT_RPM` (default: 60)
-- `RATE_LIMIT_BURST` (default: 20)
-- `MAX_VIDEO_IDS` (default: 50)
+// Middleware wrapper
+func RateLimitMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        // 1. IP Check
+        if !limiter.Allow(getIP(r)) {
+            w.WriteHeader(http.StatusTooManyRequests)
+            return
+        }
+        
+        // 2. Size Check (handled by http.MaxBytesReader in main or here)
+        
+        next.ServeHTTP(w, r)
+    })
+}
+```
+
+**Validation Logic (in `ServeHTTP` or separate validation middleware):**
+```go
+if len(req.VideoIDs) + len(req.URLs) > MaxItems {
+    http.Error(w, "Too many items", http.StatusRequestEntityTooLarge)
+    return
+}
+```
+
+### 5. Configuration (Env Vars)
+| Variable | Default | Description |
+| :--- | :--- | :--- |
+| `RATE_LIMIT_RPM` | 60 | Requests per minute per IP |
+| `RATE_LIMIT_BURST` | 20 | Token bucket burst capacity |
+| `MAX_ITEMS_PER_REQUEST` | 50 | Max combined URLs/IDs per request |
+| `MAX_BODY_BYTES` | 10240 | Max request body size in bytes (10KB) |
 
 ## Future Improvements
-- **Redis Support:** For distributed rate limiting across multiple Cloud Run instances.
-- **Cloud Armor:** Integration with GCP Cloud Armor for edge-level protection.
-- **User-based Limiting:** If authentication is added in the future.
+- **Distributed Limiting:** Use Redis (MemoryStore) to share limits across Cloud Run instances if we scale out.
+- **API Keys:** If we introduce a public API, switch to Key-based limiting instead of IP-based.
