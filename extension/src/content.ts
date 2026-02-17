@@ -1,6 +1,7 @@
 console.log("YouTube URL Replacer Content Script Loaded");
 
 // Regex to extract video ID from various YouTube URL formats
+// eslint-disable-next-line no-useless-escape
 const YOUTUBE_REGEX = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
 
 // Cache processed links to avoid re-fetching
@@ -72,7 +73,7 @@ async function scanAndReplace() {
 scanAndReplace();
 
 // Observe DOM for infinite scrolling / dynamic content
-let timeout: any;
+let timeout: ReturnType<typeof setTimeout> | undefined;
 const observer = new MutationObserver(() => {
     // Debounce to avoid spamming on every tiny DOM change
     clearTimeout(timeout);

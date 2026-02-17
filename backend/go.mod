@@ -1,6 +1,6 @@
 module github.com/sph/youtube-url-replacer/backend
 
-go 1.25
+go 1.24
 
 require (
 	cloud.google.com/go v0.123.0 // indirect
