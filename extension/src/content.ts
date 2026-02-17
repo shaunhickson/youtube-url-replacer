@@ -73,7 +73,7 @@ async function scanAndReplace() {
 scanAndReplace();
 
 // Observe DOM for infinite scrolling / dynamic content
-let timeout: NodeJS.Timeout | number | undefined;
+let timeout: ReturnType<typeof setTimeout> | undefined;
 const observer = new MutationObserver(() => {
     // Debounce to avoid spamming on every tiny DOM change
     clearTimeout(timeout);
