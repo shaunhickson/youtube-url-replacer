@@ -25,7 +25,9 @@ func TestGitHubResolver(t *testing.T) {
 			Language:        "Go",
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(data)
+		if err := json.NewEncoder(w).Encode(data); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	})
 
 	ts := httptest.NewServer(mux)

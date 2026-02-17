@@ -58,11 +58,7 @@ func (r *GitHubResolver) CanHandle(u *url.URL) bool {
 		"features":      true,
 		"topics":        true,
 	}
-	if reserved[parts[0]] {
-		return false
-	}
-
-	return true
+	return !reserved[parts[0]]
 }
 
 func (r *GitHubResolver) Resolve(ctx context.Context, u *url.URL) (*Result, error) {
