@@ -1,4 +1,4 @@
-.PHONY: all test test-backend test-extension lint lint-backend lint-extension build build-backend build-extension docker-build clean dev backend-dev extension-dev
+.PHONY: all test test-backend test-extension lint lint-backend lint-extension build build-backend build-extension build-website docker-build clean dev backend-dev extension-dev website-dev
 
 # Default target
 all: lint test build
@@ -15,7 +15,7 @@ test-extension:
 	cd extension && npm test -- --run
 
 # --- Linting ---
-lint: lint-backend lint-extension
+lint: lint-backend lint-extension lint-website
 
 lint-backend:
 	@echo "--- Linting Backend ---"
@@ -26,8 +26,12 @@ lint-extension:
 	@echo "--- Linting Extension ---"
 	cd extension && npm run lint
 
+lint-website:
+	@echo "--- Linting Website ---"
+	cd website && npm run lint
+
 # --- Building ---
-build: build-backend build-extension
+build: build-backend build-extension build-website
 
 build-backend:
 	@echo "--- Building Backend ---"
@@ -37,6 +41,10 @@ build-extension:
 	@echo "--- Building Extension ---"
 	cd extension && npm run build
 
+build-website:
+	@echo "--- Building Website ---"
+	cd website && npm run build
+
 # --- Docker ---
 docker-build:
 	@echo "--- Building Docker Image ---"
@@ -44,7 +52,7 @@ docker-build:
 
 # --- Development ---
 dev:
-	@echo "Run 'make backend-dev' and 'make extension-dev' in separate terminals."
+	@echo "Run 'make backend-dev', 'make extension-dev', and 'make website-dev' in separate terminals."
 
 backend-dev:
 	cd backend && go run main.go
@@ -52,6 +60,10 @@ backend-dev:
 extension-dev:
 	cd extension && npm run dev
 
+website-dev:
+	cd website && npm run dev
+
 clean:
 	rm -f backend/server
 	rm -rf extension/dist
+	rm -rf website/.next
