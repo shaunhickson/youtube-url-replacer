@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"strings"
@@ -75,7 +75,7 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 			if err := json.NewEncoder(w).Encode(map[string]string{
 				"error": "Too many requests. Please try again later.",
 			}); err != nil {
-				log.Printf("Failed to encode 429 response: %v", err)
+				slog.Error("Failed to encode 429 response", "error", err)
 			}
 			return
 		}

@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/sph/youtube-url-replacer/backend/resolvers"
@@ -70,7 +70,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if totalItems == 0 {
 		if err := json.NewEncoder(w).Encode(ResolveResponse{Titles: map[string]string{}}); err != nil {
-			log.Printf("Error encoding empty response: %v", err)
+			slog.Error("Error encoding empty response", "error", err)
 		}
 		return
 	}
@@ -96,6 +96,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// 3. Return combined results
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(ResolveResponse{Titles: results}); err != nil {
-		log.Printf("Error encoding response: %v", err)
+		slog.Error("Error encoding response", "error", err)
 	}
 }
