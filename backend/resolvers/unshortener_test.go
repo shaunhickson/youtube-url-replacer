@@ -22,7 +22,9 @@ func TestUnshortenerResolver(t *testing.T) {
 	})
 	mux.HandleFunc("/final", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte("<html><head><title>Final Destination</title></head></html>"))
+		if _, err := w.Write([]byte("<html><head><title>Final Destination</title></head></html>")); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	})
 
 	// 2. Loop

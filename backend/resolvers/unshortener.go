@@ -37,9 +37,7 @@ func (r *UnshortenerResolver) Name() string {
 
 func (r *UnshortenerResolver) CanHandle(u *url.URL) bool {
 	host := strings.ToLower(u.Host)
-	if strings.HasPrefix(host, "www.") {
-		host = host[4:]
-	}
+	host = strings.TrimPrefix(host, "www.")
 
 	for _, d := range r.domains {
 		if host == d {
