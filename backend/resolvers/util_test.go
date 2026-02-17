@@ -3,7 +3,18 @@ package resolvers
 import (
 	"strings"
 	"testing"
+	"time"
 )
+
+func TestSafeHttpClient_BlocksPrivate(t *testing.T) {
+	client := SafeHttpClient(1 * time.Second)
+	_, err := client.Get("http://127.0.0.1:12345")
+	if err == nil {
+		t.Error("Expected error for 127.0.0.1, got nil")
+	} else if !strings.Contains(err.Error(), "blocked") {
+		t.Errorf("Expected 'blocked' error, got: %v", err)
+	}
+}
 
 func TestExtractMetadata(t *testing.T) {
 	tests := []struct {

@@ -1,82 +1,20 @@
 package resolvers
 
 import (
-	"context"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/sph/youtube-url-replacer/backend/transport"
 )
-
-// SSRF Protection: Private and Reserved IP ranges
-var privateIPBlocks []*net.IPNet
-
-func init() {
-	for _, cidr := range []string{
-		"127.0.0.0/8",    // IPv4 loopback
-		"10.0.0.0/8",     // RFC1918
-		"172.16.0.0/12",  // RFC1918
-		"192.168.0.0/16", // RFC1918
-		"169.254.0.0/16", // RFC3927 link-local
-		"::1/128",        // IPv6 loopback
-		"fe80::/10",      // IPv6 link-local
-		"fc00::/7",       // IPv6 unique local addr
-	} {
-		_, block, _ := net.ParseCIDR(cidr)
-		privateIPBlocks = append(privateIPBlocks, block)
-	}
-}
-
-func isPrivateIP(ip net.IP) bool {
-	if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
-		return true
-	}
-	for _, block := range privateIPBlocks {
-		if block.Contains(ip) {
-			return true
-		}
-	}
-	return false
-}
 
 // SafeHttpClient returns an http.Client with SSRF protection
 func SafeHttpClient(timeout time.Duration) *http.Client {
-	dialer := &net.Dialer{
-		Timeout:   timeout,
-		KeepAlive: 30 * time.Second,
-	}
-
-	transport := &http.Transport{
-		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-			host, port, err := net.SplitHostPort(addr)
-			if err != nil {
-				return nil, err
-			}
-
-			ips, err := net.DefaultResolver.LookupIPAddr(ctx, host)
-			if err != nil {
-				return nil, err
-			}
-
-			for _, ip := range ips {
-				if isPrivateIP(ip.IP) {
-					return nil, fmt.Errorf("SSRF protection: access to private IP %s is blocked", ip.IP.String())
-				}
-			}
-
-			// Use the first safe IP
-			return dialer.DialContext(ctx, network, net.JoinHostPort(ips[0].IP.String(), port))
-		},
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-	}
-
 	return &http.Client{
-		Transport: transport,
+		Transport: transport.NewSafeTransport(),
 		Timeout:   timeout,
 	}
 }
