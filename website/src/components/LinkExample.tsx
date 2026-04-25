@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface LinkExampleProps {
     before: string;
