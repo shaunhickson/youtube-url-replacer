@@ -40,6 +40,7 @@ export const LiveDemo: React.FC = () => {
                 setError('No resolution found for this URL.');
             }
         } catch (err) {
+            console.error(err);
             setError('Error connecting to LinkLens API.');
         } finally {
             setLoading(false);
