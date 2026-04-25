@@ -19,3 +19,9 @@ variable "alert_email" {
   description = "Email address to send monitoring alerts to"
   type        = string
 }
+
+variable "youtube_api_key" {
+  description = "YouTube API Key (sensitive)"
+  type        = string
+  sensitive   = true
+}
