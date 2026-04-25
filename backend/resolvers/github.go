@@ -82,7 +82,7 @@ func (r *GitHubResolver) Resolve(ctx context.Context, u *url.URL) (*Result, erro
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == http.StatusNotFound {
 		return nil, nil // Let it fallback to OpenGraph
