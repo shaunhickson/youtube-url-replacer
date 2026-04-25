@@ -70,7 +70,7 @@ func (r *UnshortenerResolver) Resolve(ctx context.Context, u *url.URL) (*Result,
 		if err != nil {
 			return nil, err
 		}
-		resp.Body.Close()
+		_ = resp.Body.Close()
 
 		if resp.StatusCode >= 300 && resp.StatusCode < 400 {
 			location := resp.Header.Get("Location")

@@ -117,7 +117,7 @@ func main() {
 	handler.MaxBodyBytes = int64(getEnvInt("MAX_BODY_BYTES", 10240))
 
 	// Set up routes (RequestLogger -> RateLimiter -> Handler)
-	http.Handle("/resolve", middleware.RequestLogger(rateLimiter.Middleware(handler)))
+	http.Handle("/resolve", middleware.RequestLogger(middleware.Gzip(rateLimiter.Middleware(handler))))
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		if _, err := w.Write([]byte("OK")); err != nil {
