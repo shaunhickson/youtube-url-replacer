@@ -17,6 +17,7 @@ Every roadmap item follows this strict lifecycle:
 1.  **Single-Issue Focus:** Each Pull Request MUST address exactly one issue. Combining multiple features, bug fixes, or administrative tasks (like rebranding) into a single PR is strictly prohibited.
 2.  **Atomic Changes:** If a task requires changes across multiple domains (e.g., rebranding and a new feature), they must be split into separate issues and separate PRs.
 3.  **Design-Implementation Separation:** Coding (Implementation Phase) must NEVER begin until a corresponding Design Pull Request has been reviewed and MERGED into `main`.
+4.  **Test-Driven Development (TDD):** All implementation work must follow TDD principles. Tests (unit, integration, or E2E) MUST be written alongside or before the feature code. Pull Requests without adequate test coverage will be rejected.
 
 ```mermaid
 graph TD
@@ -84,5 +85,6 @@ To support this workflow, the following GitHub Actions are recommended:
 
 ## Agent Guidelines
 1.  **Read the Roadmap:** Always check `docs/PRODUCT_ROADMAP.md` before starting.
-2.  **Link Issues:** Use "Fixes #12" in PR descriptions.
-3.  **Self-Correction:** If CI fails, the agent must fix the errors in a new commit on the same branch.
+2.  **Test-Driven Development (TDD):** When writing code, ALWAYS write tests first or concurrently. Never write implementation code without tests.
+3.  **Link Issues:** Use "Fixes #12" in PR descriptions.
+4.  **Self-Correction:** If CI fails, the agent must fix the errors in a new commit on the same branch.
