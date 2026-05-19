@@ -68,7 +68,8 @@ The project includes a `Makefile` with common tasks:
 - `make build-backend`: Build the Go binary.
 - `make build-extension`: Build the React extension.
 - `make test-backend`: Run all Go tests.
-- `make test-extension`: Run vitest for the extension.
+- `make test-extension`: Run vitest for the extension unit/integration tests.
+- `cd extension && npm run test:e2e`: Run Playwright E2E tests for the extension (requires `npm run build` first).
 
 ## Contributing
 
