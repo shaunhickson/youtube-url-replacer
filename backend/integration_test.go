@@ -37,7 +37,7 @@ func TestIntegration_ResolveOpenGraph(t *testing.T) {
 	// Create a mock target server that returns a valid OpenGraph HTML response
 	mockTarget := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(`
+		_, _ = w.Write([]byte(`
 			<html>
 			<head>
 				<meta property="og:title" content="Integration Test Title">
@@ -61,7 +61,7 @@ func TestIntegration_ResolveOpenGraph(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to make request: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("Expected status 200, got %d", resp.StatusCode)
@@ -106,7 +106,7 @@ func TestIntegration_SSRFProtection(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to make request: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("Expected status 200 (since partial failures return 200), got %d", resp.StatusCode)
@@ -141,7 +141,7 @@ func TestIntegration_InvalidURL(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to make request: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("Expected status 200, got %d", resp.StatusCode)
