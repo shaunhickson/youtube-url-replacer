@@ -7,11 +7,11 @@ const __dirname = path.dirname(__filename);
 
 test('LinkLens injects tooltip and modifies link text', async ({ page }) => {
   // 1. Mock the backend API call to ensure fast, deterministic tests without hitting network
-  await page.route('**/resolve?url=*', async (route) => {
+  await page.route('**/resolve*', async (route) => {
     const json = {
-      title: "Rick Astley - Never Gonna Give You Up (Official Music Video)",
-      originalUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      platform: "YouTube"
+      titles: {
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ": "Rick Astley - Never Gonna Give You Up (Official Music Video)"
+      }
     };
     await route.fulfill({ json });
   });
