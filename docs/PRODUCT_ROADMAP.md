@@ -53,14 +53,14 @@ The modern web is cluttered with opaque identifiers: shortened links (`bit.ly/xy
 *   [ ] **Social Media:** Better context for X (Twitter), LinkedIn, etc.
 *   [ ] **Enterprise Pilot:** Integration for private tools (Jira, Linear, Notion) via self-hosted or authenticated resolvers.
 
-### Phase 4: Quality & Confidence (E2E Testing)
+### Phase 4: Quality & Confidence (Completed)
 *Goal: Ensure the extension reliably modifies the DOM without breaking pages.*
 
-*   [ ] **Playwright Framework:** Setup Playwright for Browser Extension E2E Testing (Issue #81).
-*   [ ] **Test Fixtures:** Create test fixtures for complex DOM structures like Shadow DOM, React SPAs, and infinite scroll (Issue #82).
-*   [ ] **Backend Tests:** Backend Integration Test Suite (Issue #83).
+*   [x] **Playwright Framework:** Setup Playwright for Browser Extension E2E Testing (Issue #81).
+*   [x] **Test Fixtures:** Create test fixtures for complex DOM structures like Shadow DOM, React SPAs, and infinite scroll (Issue #82).
+*   [x] **Backend Tests:** Backend Integration Test Suite (Issue #83).
 
-### Phase 5: UX & Performance Polish
+### Phase 5: UX & Performance Polish (Current Focus)
 *Goal: Improve user onboarding and reduce backend latency/costs.*
 
 *   [ ] **Onboarding:** Build a "First-Time Install" Onboarding Flow (Issue #84).
