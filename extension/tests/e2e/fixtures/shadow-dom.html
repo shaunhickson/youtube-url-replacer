@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head><title>Shadow DOM Test</title></head>
+<body>
+  <div id="host"></div>
+  <script>
+    const host = document.getElementById('host');
+    const shadow = host.attachShadow({mode: 'open'});
+    const link = document.createElement('a');
+    link.href = 'https://www.youtube.com/watch?v=shadowdom';
+    link.textContent = 'https://www.youtube.com/watch?v=shadowdom';
+    shadow.appendChild(link);
+  </script>
+</body>
+</html>

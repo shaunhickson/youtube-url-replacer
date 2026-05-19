@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head><title>Infinite Scroll Test</title></head>
+<body>
+  <div id="container"></div>
+  <script>
+    const container = document.getElementById('container');
+    for (let i = 0; i < 50; i++) {
+      const p = document.createElement('p');
+      p.innerHTML = `<a href="https://www.youtube.com/watch?v=scroll${i}">https://www.youtube.com/watch?v=scroll${i}</a>`;
+      container.appendChild(p);
+    }
+  </script>
+</body>
+</html>
