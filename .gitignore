@@ -22,3 +22,5 @@
 .claude/commands/
 .logs/
 .beads/
+extension/playwright-report/
+extension/test-results/
