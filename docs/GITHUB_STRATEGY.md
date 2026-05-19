@@ -17,7 +17,7 @@ Every roadmap item follows this strict lifecycle:
 1.  **Single-Issue Focus:** Each Pull Request MUST address exactly one issue. Combining multiple features, bug fixes, or administrative tasks (like rebranding) into a single PR is strictly prohibited.
 2.  **Atomic Changes:** If a task requires changes across multiple domains (e.g., rebranding and a new feature), they must be split into separate issues and separate PRs.
 3.  **Design-Implementation Separation:** Coding (Implementation Phase) must NEVER begin until a corresponding Design Pull Request has been reviewed and MERGED into `main`.
-4.  **Test-Driven Development (TDD):** All implementation work must follow TDD principles. Tests (unit, integration, or E2E) MUST be written alongside or before the feature code. Pull Requests without adequate test coverage will be rejected.
+4.  **Test-Driven Development (TDD):** All implementation work must follow TDD principles. Tests (unit, integration, or E2E) MUST be written alongside or before the feature code. Pull Requests without adequate test coverage will be rejected. When changing extension DOM interactions or UI, **Playwright E2E tests** must be written or updated in `extension/tests/e2e/`.
 
 ```mermaid
 graph TD
