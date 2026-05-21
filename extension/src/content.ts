@@ -162,7 +162,14 @@ class LinkLensOptimizer {
 
                 if (titles[url]) {
                     const title = titles[url];
-                    const platform = isYT ? 'youtube' : 'generic';
+                    const backendPlatform = details[url]?.platform?.toLowerCase();
+                    const defaultPlatform = isYT ? 'youtube' : 'generic';
+                    
+                    let platform = defaultPlatform;
+                    if (backendPlatform && ICONS[backendPlatform as keyof typeof ICONS]) {
+                        platform = backendPlatform;
+                    }
+
                     const iconSvg = ICONS[platform as keyof typeof ICONS] || ICONS.generic;
                     
                     // Inject Icon and update text
