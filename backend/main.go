@@ -101,10 +101,45 @@ func main() {
 		manager.Register(resolvers.NewUnshortenerResolver(manager))
 	}
 
+	// Register Twitter Resolver
+	if isEnabled("twitter") {
+		twitterBearerToken := os.Getenv("TWITTER_BEARER_TOKEN")
+		if twitterBearerToken != "" {
+			manager.Register(resolvers.NewTwitterResolver(twitterBearerToken))
+		}
+	}
+
+	// Register LinkedIn Resolver
+	if isEnabled("linkedin") {
+		linkedinAccessToken := os.Getenv("LINKEDIN_ACCESS_TOKEN")
+		if linkedinAccessToken != "" {
+			manager.Register(resolvers.NewLinkedInResolver(linkedinAccessToken))
+		}
+	}
+
 	// Register GitHub Resolver
 	if isEnabled("github") {
 		githubToken := os.Getenv("GITHUB_TOKEN")
 		manager.Register(resolvers.NewGitHubResolver(githubToken))
+	}
+
+	// Register Reddit Resolver
+	if isEnabled("reddit") {
+		manager.Register(resolvers.NewRedditResolver())
+	}
+
+	// Register Wikipedia Resolver
+	if isEnabled("wikipedia") {
+		manager.Register(resolvers.NewWikipediaResolver())
+	}
+
+	// Register Spotify Resolver
+	if isEnabled("spotify") {
+		spotifyClientID := os.Getenv("SPOTIFY_CLIENT_ID")
+		spotifyClientSecret := os.Getenv("SPOTIFY_CLIENT_SECRET")
+		if spotifyClientID != "" && spotifyClientSecret != "" {
+			manager.Register(resolvers.NewSpotifyResolver(spotifyClientID, spotifyClientSecret))
+		}
 	}
 
 	// Register OpenGraph Resolver (Fallback)
